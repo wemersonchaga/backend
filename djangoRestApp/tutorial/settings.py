@@ -68,6 +68,7 @@ MIDDLEWARE = [
 
 CORS_ALLOWED_ORIGINS = [
     "http://localhost:4200",
+    "http://20.119.97.89:8000",
     # Adicione outros domínios permitidos conforme necessário
 ]
 CORS_ALLOW_ALL_ORIGINS = True
