@@ -26,7 +26,8 @@ SECRET_KEY = 'django-insecure-u(&j6yyf8llzbv))6!17t$+bb9h8jnyz0s7s%n))k!4juk&5hs
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['20.119.97.89']
+
 
 DATE_FORMAT = 'd/m/Y'
 
