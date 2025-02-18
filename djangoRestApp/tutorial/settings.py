@@ -70,6 +70,7 @@ MIDDLEWARE = [
 CORS_ALLOWED_ORIGINS = [
     "http://localhost:4200",
     "http://20.119.97.89:8000",
+    "https://nannyspets-be-drc8ggc3d4c7hxfr.brazilsouth-01.azurewebsites.net",
     # Adicione outros domínios permitidos conforme necessário
 ]
 CORS_ALLOW_ALL_ORIGINS = True
