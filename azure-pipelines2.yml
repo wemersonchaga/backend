@@ -22,7 +22,7 @@ stages:
     steps:
     - task: Docker@2
       inputs:
-        containerRegistry: 'nannyspet'  # Referencie seu serviço de registro Docker
+        containerRegistry: 'nannysconect'  # Referencie seu serviço de registro Docker
         repository: 'wemersonchagas/nannyspet'  # Nome do repositório no Docker Hub ou em outro registro
         command: 'buildAndPush'
         dockerfile: '$(Build.SourcesDirectory)/djangoRestApp/Dockerfile'
