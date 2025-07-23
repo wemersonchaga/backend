@@ -13,5 +13,5 @@ setuptools==70.3.0
 sqlparse==0.5.1
 tzdata==2024.1
 uritemplate==4.1.1
-psycopg2-binary==2.9.9
+psycopg==3.2.1
 gunicorn==22.0.0
