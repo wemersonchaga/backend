@@ -110,14 +110,13 @@ WSGI_APPLICATION = 'tutorial.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql',
-        'NAME': 'backend_db',
-        'USER': 'wemerson',
-        'PASSWORD': '1240',  # a senha que você usou no docker run
-        'HOST': 'localhost',
-        'PORT': '5432',
+        'NAME': os.getenv('DB_NAME', 'backend_db'),  # 'backend_db' é o valor padrão
+        'USER': os.getenv('DB_USER', 'wemerson'),    # 'wemerson' é o valor padrão
+        'PASSWORD': os.getenv('DB_PASSWORD', '1240'),  # '1240' é o valor padrão
+        'HOST': os.getenv('DB_HOST', 'localhost'),   # 'localhost' é o valor padrão
+        'PORT': os.getenv('DB_PORT', '5432'),       # '5432' é o valor padrão
     }
 }
-
 
 
 # Password validation
@@ -163,3 +162,6 @@ MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 # https://docs.djangoproject.com/en/4.2/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
+ALLOWED_HOSTS = ['*']  # ou ['nome-do-app.onrender.com'] depois
+CSRF_TRUSTED_ORIGINS = ['https://*.onrender.com']
