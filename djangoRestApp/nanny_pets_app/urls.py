@@ -7,15 +7,23 @@ from .views import (
     CustomAuthToken,
     UserRegisterView,
     CuidadorViewSet,
-    TutorViewSet
+    TutorViewSet,
+    PedidoViewSet,
+    HospedagemViewSet,
+    PetViewSet,
+    AvaliacaoCuidadorViewSet
+
 )
 
 router = DefaultRouter()
 router.register(r'cuidadores', CuidadorViewSet, basename='cuidador')
 router.register(r'tutores', TutorViewSet)
+router.register(r'pedidos', PedidoViewSet, basename='pedido')
+router.register(r'hospedagens', HospedagemViewSet, basename='hospedagem')
+router.register(r'pets', PetViewSet, basename='pet')
+router.register(r'avaliacoes', AvaliacaoCuidadorViewSet, basename='avaliacoes')
 
 urlpatterns = router.urls
-
 
 urlpatterns = [
     path('', include(router.urls)),

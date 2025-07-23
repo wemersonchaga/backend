@@ -91,10 +91,8 @@ class CaracteristicasCuidadorAdmin(admin.ModelAdmin):
 
 @admin.register(AvaliacaoCuidador)
 class AvaliacaoCuidadorAdmin(admin.ModelAdmin):
-    list_display = ('cuidador', 'nota', 'data_hora')
-    list_filter = ('nota',)
-    search_fields = ('cuidador__nome',)
-
+    list_display = ('cuidador', 'tutor', 'nota', 'data_hora')
+    search_fields = ('cuidador__nome', 'tutor__nome')
 
 class ImagemAmbienteAdmin(admin.ModelAdmin):
     list_display = ('cuidador', 'foto')

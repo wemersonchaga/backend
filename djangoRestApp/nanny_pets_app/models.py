@@ -1,4 +1,5 @@
 from django.db import models
+from django.contrib.auth.models import User  
 
 # Modelo base abstrato
 class Pessoa(models.Model):
@@ -8,13 +9,18 @@ class Pessoa(models.Model):
     cpf = models.CharField(max_length=14, unique=True)
     email = models.EmailField(unique=True)
     senha = models.CharField(max_length=128, default='123456')
-    foto_perfil = models.ImageField(upload_to='perfil/', blank=True, null=True)
-
+    foto_perfil = models.ImageField(
+        upload_to='uploads/',
+        default='defaults/avatar_padrao.png',
+        blank=True
+        )
+    
     class Meta:
         abstract = True
 
 # Tutor - dono do pet
 class Tutor(Pessoa):
+    user = models.OneToOneField(User, on_delete=models.CASCADE, related_name='tutor')
     plataforma_indicacao = models.CharField(max_length=100, blank=True, null=True)
 
     def __str__(self):
@@ -22,6 +28,7 @@ class Tutor(Pessoa):
 
 # Cuidador - quem hospeda pets
 class Cuidador(Pessoa):
+    user = models.OneToOneField(User, on_delete=models.CASCADE, related_name='cuidador')
     telefone = models.CharField(max_length=15)
     cep = models.CharField(max_length=8, null=True)
     estado = models.CharField(max_length=100, null=True)
@@ -41,11 +48,15 @@ class Pet(models.Model):
     nome = models.CharField(max_length=100)
     especie = models.CharField(max_length=50)
     raca = models.CharField(max_length=50, blank=True, null=True)
-    porte = models.CharField(max_length=20)  # Ex: pequeno, médio, grande
+    porte = models.CharField(max_length=20, choices=[
+        ('pequeno', 'Pequeno'),
+        ('medio', 'Médio'),
+        ('grande', 'Grande')
+    ])
     idade = models.PositiveIntegerField()
     castrado = models.BooleanField(default=False)
     genero = models.CharField(max_length=10, choices=[('Macho', 'Macho'), ('Fêmea', 'Fêmea')])
-    foto = models.ImageField(upload_to='pets/', blank=True, null=True)  # Novo campo
+    foto = models.ImageField(upload_to='pets/', blank=True, null=True)
     observacoes = models.TextField(blank=True, null=True)
 
     def __str__(self):
@@ -57,7 +68,6 @@ class Pedido(models.Model):
         ('pendente', 'Pendente'),
         ('aprovado', 'Aprovado'),
         ('recusado', 'Recusado'),
-        ('concluido', 'Concluído'),
         ('cancelado', 'Cancelado'),
     ]
 
@@ -71,11 +81,32 @@ class Pedido(models.Model):
     criado_em = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
-        return f'Hospedagem {self.pet.nome} de {self.data_inicio} a {self.data_fim} - {self.status}'
+        return f'Pedido de {self.tutor.nome} para {self.pet.nome} ({self.status})'
 
+# Pedido de hospedagem (aceito=confirmada pelo cuidador)
+class Hospedagem(models.Model):
+    tutor = models.ForeignKey(Tutor, on_delete=models.CASCADE, related_name='hospedagens')
+    cuidador = models.ForeignKey(Cuidador, on_delete=models.CASCADE, related_name='hospedagens')
+    pet = models.ForeignKey(Pet, on_delete=models.CASCADE, related_name='hospedagens')
+    pedido = models.OneToOneField(Pedido, on_delete=models.SET_NULL, null=True, blank=True)
+    data_inicio = models.DateField()
+    data_fim = models.DateField()
+    status = models.CharField(max_length=20, choices=[
+        ('confirmada', 'Confirmada'),
+        ('em_andamento', 'Em andamento'),
+        ('finalizada', 'Finalizada'),
+        ('cancelada', 'Cancelada'),
+    ], default='confirmada')
+    observacoes = models.TextField(blank=True)
+
+    def __str__(self):
+        return f"{self.pet.nome} hospedado com {self.cuidador.nome}"
+    
 # Avaliação de cuidadores
 class AvaliacaoCuidador(models.Model):
+    hospedagem = models.OneToOneField(Hospedagem, on_delete=models.CASCADE, related_name='avaliacao')
     cuidador = models.ForeignKey(Cuidador, on_delete=models.CASCADE, related_name='avaliacoes')
+    tutor = models.ForeignKey(Tutor, on_delete=models.CASCADE, related_name='avaliacoes')
     nota = models.PositiveSmallIntegerField()
     comentario = models.TextField(blank=True)
     data_hora = models.DateTimeField(auto_now_add=True)
