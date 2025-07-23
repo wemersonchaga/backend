@@ -1,6 +1,6 @@
-from django.urls import path, include
+from django.urls import path, include, re_path
 from rest_framework.routers import DefaultRouter
-
+from django.shortcuts import redirect
 from .views import (
     CaracteristicasAPIView,
     CaracteristicasDoCuidadorView,
@@ -26,7 +26,7 @@ router.register(r'avaliacoes', AvaliacaoCuidadorViewSet, basename='avaliacoes')
 urlpatterns = router.urls
 
 urlpatterns = [
-    path('', include(router.urls)),
+    path('', lambda request: redirect('swagger/')),  # Redireciona para /swagger/
     path('caracteristicas/', CaracteristicasAPIView.as_view(), name='caracteristicas-list'),
     path('cuidadores/<int:cuidador_id>/caracteristicas/', CaracteristicasDoCuidadorView.as_view(), name='caracteristicas-cuidador'),
     path('api/login/', CustomAuthToken.as_view(), name='api_login'),
