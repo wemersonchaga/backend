@@ -1,17 +1,16 @@
-from django.shortcuts import render, get_object_or_404
+from django.shortcuts import get_object_or_404
 from rest_framework.views import APIView
 from rest_framework.response import Response
-from rest_framework import status,generics,filters
+from rest_framework import status
 from rest_framework.authtoken.views import ObtainAuthToken
 from rest_framework.authtoken.models import Token
-from rest_framework.response import Response
-from .serializers import UserSerializer
-from rest_framework.views import APIView
 
-
-from .models import Cuidador, Caracteristicas, Tutor
-from .serializers import TutorSerializer,CuidadorSerializer, CaracteristicasSerializer
-# Create your views here.
+from .models import Cuidador, Tutor
+from .serializers import TutorSerializer, CuidadorSerializer, CaracteristicasCuidadorSerializer, UserSerializer
+from rest_framework import viewsets
+from django_filters.rest_framework import DjangoFilterBackend
+from .filters import CuidadorFilter
+from rest_framework.decorators import action
 
 class CustomAuthToken(ObtainAuthToken):
     def post(self, request, *args, **kwargs):
@@ -33,66 +32,35 @@ class UserRegisterView(APIView):
             return Response(serializer.data, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
         
-
-class CuidadorFiltradoView(generics.ListAPIView):
-    serializer_class = CuidadorSerializer
+class CuidadorViewSet(viewsets.ModelViewSet):
     queryset = Cuidador.objects.all()
-    filter_backends = [filters.BaseFilterBackend]    
+    serializer_class = CuidadorSerializer
+    filter_backends = [DjangoFilterBackend]
+    filterset_class = CuidadorFilter
 
-    def filter_queryset(self, queryset):
-        caracteristicas = self.request.query_params.getlist('caracteristicas')
+    @action(detail=False, methods=['get'], url_path='filtrar')
+    def filtrar_por_caracteristicas(self, request):
+        caracteristicas = request.query_params.getlist('caracteristicas')
+        queryset = self.get_queryset()
         if caracteristicas:
             queryset = queryset.filter(caracteristicas__id__in=caracteristicas).distinct()
-        return queryset
-
-
-class CuidadorAPIView(APIView):
-    serializer_class = CuidadorSerializer     
-
-    def post(self, request):
-        serializer = self.serializer_class(data=request.data)
-        if serializer.is_valid():
-            serializer.save()
-            return Response(serializer.data, status=status.HTTP_201_CREATED)
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-
-    def get(self, request):
-        cuidadores = Cuidador.objects.all()
-        caracteristicas = request.query_params.getlist('caracteristicas')
-        if caracteristicas:
-            cuidadores = cuidadores.filter(caracteristicas__id__in=caracteristicas).distinct()
-        serializer = CuidadorSerializer(cuidadores, many=True)
+        serializer = self.get_serializer(queryset, many=True)
         return Response(serializer.data)
 
-    
 class CaracteristicasAPIView(APIView):
     def get(self, request):
-        caracteristicas = Caracteristicas.objects.all()
-        serializer = CaracteristicasSerializer(caracteristicas, many=True)
+        from .models import CaracteristicasCuidador  # adicione este import
+        caracteristicas = CaracteristicasCuidador.objects.all()
+        serializer = CaracteristicasCuidadorSerializer(caracteristicas, many=True)
         return Response(serializer.data)
-
 
 class CaracteristicasDoCuidadorView(APIView):
     def get(self, request, cuidador_id):
         cuidador = get_object_or_404(Cuidador, id=cuidador_id)
-        caracteristicas = cuidador.caracteristicas.all()
-        serializer = CaracteristicaSerializer(caracteristicas, many=True)
+        caracteristicas = cuidador.caracteristicas.all()  # instância, não classe
+        serializer = CaracteristicasCuidadorSerializer(caracteristicas, many=True)
         return Response(serializer.data)
 
-class TutorAPIView(APIView):
+class TutorViewSet(viewsets.ModelViewSet):
+    queryset = Tutor.objects.all()
     serializer_class = TutorSerializer
-
-    def get(self, request):
-     	tutores = Tutor.objects.all()
-     	serializer = TutorSerializer(tutores, many=True)
-     	return Response(serializer.data)
-    
-    def post(self, request):
-        serializer = self.serializer_class(data=request.data)
-
-        if serializer.is_valid():
-            serializer.save()
-            return Response(serializer.data, status=status.HTTP_201_CREATED)
-        
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-

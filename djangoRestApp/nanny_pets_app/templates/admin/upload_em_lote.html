@@ -1,0 +1,7 @@
+<form method="post" enctype="multipart/form-data">
+  {% csrf_token %}
+  {{ form.cuidador.label_tag }} {{ form.cuidador }}
+  <label for="id_fotos">Imagens do Ambiente:</label>
+  <input type="file" name="fotos" id="id_fotos" multiple>
+  <button type="submit">Enviar</button>
+</form>

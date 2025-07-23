@@ -1,7 +1,19 @@
+import django_filters
 from rest_framework import serializers
 from django.contrib.auth.models import User
 
-from .models import Cuidador, Caracteristicas, Tutor
+from .models import Cuidador, CaracteristicasCuidador, Tutor
+
+class CuidadorFilter(django_filters.FilterSet):
+    caracteristicas = django_filters.ModelMultipleChoiceFilter(
+        field_name='caracteristicas',
+        queryset=CaracteristicasCuidador.objects.all(),
+        conjoined=False  # ou True se quiser que sejam todas (E), não qualquer (OU)
+    )
+
+    class Meta:
+        model = Cuidador
+        fields = ['caracteristicas']
 
 class UserSerializer(serializers.ModelSerializer):
     class Meta:
@@ -10,22 +22,21 @@ class UserSerializer(serializers.ModelSerializer):
         extra_kwargs = {'password': {'write_only': True}}
 
     def create(self, validated_data):
-        # Criação do usuário com criptografia da senha
         user = User.objects.create_user(
             username=validated_data['username'],
             password=validated_data['password']
         )
         return user
 
-class CaracteristicasSerializer(serializers.ModelSerializer):
+class CaracteristicasCuidadorSerializer(serializers.ModelSerializer):
     class Meta:
-        model = Caracteristicas
-        fields = ['id', 'nome']
+        model = CaracteristicasCuidador
+        fields = '__all__'  # ou uma lista que contém 'estudante_de_veterinaria'
 
 class CuidadorSerializer(serializers.ModelSerializer):
-    # Usamos PrimaryKeyRelatedField para aceitar IDs das características no ManyToManyField
-    caracteristicas = serializers.PrimaryKeyRelatedField(
-        many=True, queryset=Caracteristicas.objects.all()
+    caracteristicas = CaracteristicasCuidadorSerializer(many=True, read_only=True)
+    caracteristicas_ids = serializers.PrimaryKeyRelatedField(
+        many=True, queryset=CaracteristicasCuidador.objects.all(), write_only=True, source='caracteristicas'
     )
 
     class Meta:
@@ -38,25 +49,18 @@ class CuidadorSerializer(serializers.ModelSerializer):
             'cpf',
             'email',
             'telefone',
-            'logradouro',
             'cep',
-            'uf',
-            'localidade',
             'numero',
             'instagram',
-            'caracteristicas'
+            'caracteristicas',      # leitura (detalhado)
+            'caracteristicas_ids'   # escrita (apenas IDs)
         ]
+
     def create(self, validated_data):
-        caracteristicas_data = validated_data.pop('caracteristicas')
-        cuidador = Cuidador.objects.create(**validated_data)
-        cuidador.caracteristicas.set(caracteristicas_data)
-        return cuidador
+        return super().create(validated_data)
 
     def update(self, instance, validated_data):
-        caracteristicas_data = validated_data.pop('caracteristicas')
-        instance = super().update(instance, validated_data)
-        instance.caracteristicas.set(caracteristicas_data)
-        return instance
+        return super().update(instance, validated_data)
 
 class TutorSerializer(serializers.ModelSerializer):
     class Meta:
@@ -67,6 +71,6 @@ class TutorSerializer(serializers.ModelSerializer):
             'sobrenome',
             'data_nascimento',
             'cpf',
-            'email'
+            'email',
+            'foto_perfil',
         )
-

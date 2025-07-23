@@ -20,6 +20,7 @@ from django.urls import path, include
 from rest_framework import permissions
 from drf_yasg.views import get_schema_view
 from drf_yasg import openapi
+from django.shortcuts import redirect
 
 
 schema_view = get_schema_view(
@@ -37,7 +38,9 @@ schema_view = get_schema_view(
 
 urlpatterns = [
     path('admin/', admin.site.urls),
-    path('api/v1/', include('nanny_pets_app.urls')),  
+    path('api/v1/', include('nanny_pets_app.urls')), 
+    path('', lambda request: redirect('/swagger/')),
+ 
 ]
 
 urlpatterns += [

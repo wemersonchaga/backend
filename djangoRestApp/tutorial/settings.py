@@ -26,7 +26,10 @@ SECRET_KEY = 'django-insecure-u(&j6yyf8llzbv))6!17t$+bb9h8jnyz0s7s%n))k!4juk&5hs
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = ['20.119.97.89']
+
+ALLOWED_HOSTS = ['localhost', '127.0.0.1', '20.119.97.89']
+if 'CODESPACE_NAME' in os.environ:
+    ALLOWED_HOSTS.append(f'{os.environ["CODESPACE_NAME"]}-8000.app.github.dev')
 
 
 DATE_FORMAT = 'd/m/Y'
@@ -44,6 +47,7 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'corsheaders',
+    'drf_yasg',
     'rest_framework.authtoken'
 
 ]
