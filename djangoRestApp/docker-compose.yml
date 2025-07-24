@@ -1,14 +1,39 @@
-version: '3.5'
+
 services:
- backend:
-      container_name: nannys_pets-backend
-      image: nannys_pets/backend
-      build: 
-        context: .
-        dockerfile: Dockerfile
-      ports:
-        - 8000:8000
-      volumes:
-        - .:/app
-      networks:
-        - default
+  backend:
+    container_name: nannys_pets-backend
+    image: nannys_pets/backend
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - 8000:8000
+    volumes:
+      - .:/app
+    env_file:
+      - .env
+    depends_on:
+      - db
+    command: >
+      sh -c "./wait-for-db.sh db 5432 &&
+             python manage.py migrate &&
+             python manage.py runserver 0.0.0.0:8000"
+    networks:
+      - default
+
+  db:
+    image: postgres:14
+    restart: always
+    environment:
+      POSTGRES_DB: nannyspet
+      POSTGRES_USER: wemerson
+      POSTGRES_PASSWORD: 1240
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    networks:
+      - default
+
+volumes:
+  postgres_data:

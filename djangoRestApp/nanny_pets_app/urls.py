@@ -12,7 +12,6 @@ from .views import (
     HospedagemViewSet,
     PetViewSet,
     AvaliacaoCuidadorViewSet
-
 )
 
 router = DefaultRouter()
@@ -25,10 +24,12 @@ router.register(r'avaliacoes', AvaliacaoCuidadorViewSet, basename='avaliacoes')
 
 urlpatterns = router.urls
 
-urlpatterns = [
-    path('', lambda request: redirect('swagger/')),  # Redireciona para /swagger/
+urlpatterns += [
     path('caracteristicas/', CaracteristicasAPIView.as_view(), name='caracteristicas-list'),
     path('cuidadores/<int:cuidador_id>/caracteristicas/', CaracteristicasDoCuidadorView.as_view(), name='caracteristicas-cuidador'),
     path('api/login/', CustomAuthToken.as_view(), name='api_login'),
     path('register/', UserRegisterView.as_view(), name='register'),
+
+    # Solução para erro 404 ao acessar /accounts/login/
+    path('accounts/', include('django.contrib.auth.urls')),
 ]
