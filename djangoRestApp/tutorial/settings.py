@@ -5,6 +5,7 @@ Django settings for tutorial project.
 import os
 from pathlib import Path
 from dotenv import load_dotenv
+from rest_framework.permissions import AllowAny
 
 # Define o diretório base do projeto
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -49,9 +50,7 @@ REST_FRAMEWORK = {
     'DEFAULT_PERMISSION_CLASSES': [
         'rest_framework.permissions.IsAuthenticated',
     ],
-    'DEFAULT_FILTER_BACKENDS': [
-        'django_filters.rest_framework.DjangoFilterBackend',
-    ]
+    'DEFAULT_SCHEMA_CLASS': 'rest_framework.schemas.coreapi.AutoSchema',  # opcional
 }
 
 

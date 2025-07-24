@@ -18,8 +18,9 @@ schema_view = get_schema_view(
     ),
     public=True,
     permission_classes=(permissions.AllowAny,),
-    authentication_classes=[],  # Sem autenticação no Swagger UI
+    authentication_classes=[],  # ← isso desativa a exigência de token no Swagger
 )
+
 
 # Redireciona a raiz para o Swagger UI
 def redirect_to_swagger(request):
