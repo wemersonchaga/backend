@@ -12,6 +12,7 @@ from .filters import CuidadorFilter
 from rest_framework.decorators import action
 from .permissions import IsTutorUser
 from rest_framework.exceptions import ValidationError, PermissionDenied
+from django.contrib.auth import authenticate
 
 class CustomAuthToken(ObtainAuthToken):
     def post(self, request, *args, **kwargs):
@@ -199,7 +200,6 @@ class PetViewSet(viewsets.ModelViewSet):
                 raise PermissionDenied("Você não tem permissão para excluir este pet.")
             instance.delete()
 
-
 class AvaliacaoCuidadorViewSet(viewsets.ModelViewSet):
     queryset = AvaliacaoCuidador.objects.all()
     serializer_class = AvaliacaoCuidadorSerializer
@@ -210,3 +210,17 @@ class AvaliacaoCuidadorViewSet(viewsets.ModelViewSet):
         if hasattr(user, 'tutor'):
             return AvaliacaoCuidador.objects.filter(tutor=user.tutor)
         return AvaliacaoCuidador.objects.none()
+
+class LoginView(APIView):
+    authentication_classes = []  # Nenhuma autenticação necessária para acessar
+    permission_classes = []      # Permite acesso anônimo
+
+    def post(self, request):
+        username = request.data.get('username')
+        password = request.data.get('password')
+
+        user = authenticate(username=username, password=password)
+        if user:
+            token, created = Token.objects.get_or_create(user=user)
+            return Response({'token': token.key})
+        return Response({'error': 'Credenciais inválidas'}, status=status.HTTP_401_UNAUTHORIZED)
