@@ -43,21 +43,30 @@ INSTALLED_APPS = [
 ]
 
 # DRF config
+# ...
+
+# DRF config
 REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': [
         'rest_framework.authentication.TokenAuthentication',
     ],
     'DEFAULT_PERMISSION_CLASSES': [
-        'rest_framework.permissions.IsAuthenticated',  # protege a API por padrão
+        'rest_framework.permissions.IsAuthenticated',  # 🔒 Protege a API por padrão
     ],
     'DEFAULT_SCHEMA_CLASS': 'rest_framework.schemas.openapi.AutoSchema',
 }
 
-# Adicionando esta configuração para o Swagger ignorar autenticação
+# 🔓 Libera o Swagger sem autenticação (isso afeta apenas a interface do Swagger, não a API em si)
 SWAGGER_SETTINGS = {
     'USE_SESSION_AUTH': False,
     'SECURITY_DEFINITIONS': None,
 }
+
+# Se quiser liberar só no modo DEBUG (ambiente local)
+if DEBUG:
+    REST_FRAMEWORK['DEFAULT_PERMISSION_CLASSES'] = [
+        'rest_framework.permissions.AllowAny'
+    ]
 
 
 # Middleware
