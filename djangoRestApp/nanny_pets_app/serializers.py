@@ -6,6 +6,23 @@ from .models import Cuidador, CaracteristicasCuidador, Tutor, Pedido, Hospedagem
 from datetime import date
 from django.conf import settings
 from urllib.parse import urljoin
+from rest_framework.validators import UniqueValidator
+
+class UserSerializer(serializers.ModelSerializer):
+    email = serializers.EmailField(
+        required=True,
+        validators=[UniqueValidator(queryset=User.objects.all(), message="Este e-mail já está em uso.")]
+    )
+
+    class Meta:
+        model = User
+        fields = ['id', 'username', 'email', 'password']
+        extra_kwargs = {
+            'password': {'write_only': True},
+        }
+
+    def create(self, validated_data):
+        return User.objects.create_user(**validated_data)
 
 class CuidadorFilter(django_filters.FilterSet):
     caracteristicas = django_filters.ModelMultipleChoiceFilter(
@@ -17,19 +34,6 @@ class CuidadorFilter(django_filters.FilterSet):
     class Meta:
         model = Cuidador
         fields = ['caracteristicas']
-
-class UserSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = User
-        fields = ['id', 'username', 'password', 'email']
-        extra_kwargs = {
-            'password': {'write_only': True},
-            'email': {'required': True},  # força o uso do email
-        }
-
-    def create(self, validated_data):
-        return User.objects.create_user(**validated_data)
-
 
 class CaracteristicasCuidadorSerializer(serializers.ModelSerializer):
     class Meta:
