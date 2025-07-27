@@ -11,6 +11,7 @@ from .views import (
     TutorViewSet,
     PedidoViewSet,
     HospedagemViewSet,
+    usuario_logado,
     PetViewSet,
     AvaliacaoCuidadorViewSet
 )
@@ -31,7 +32,7 @@ urlpatterns += [
     path('api/login/', CustomAuthToken.as_view(), name='api_login'),
     path('register/', UserRegisterView.as_view(), name='register'),
     path('login/', LoginView.as_view(), name='api-login'),
-
+    path('usuarios/me/', usuario_logado, name='usuario-logado'),
     # Solução para erro 404 ao acessar /accounts/login/
     path('accounts/', include('django.contrib.auth.urls')),
 ]

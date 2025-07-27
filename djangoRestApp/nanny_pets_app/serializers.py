@@ -219,3 +219,19 @@ class AvaliacaoCuidadorSerializer(serializers.ModelSerializer):
         validated_data['tutor'] = tutor
         validated_data['cuidador'] = hospedagem.cuidador
         return super().create(validated_data)
+
+class TutorSerializer(serializers.ModelSerializer):
+    nome = serializers.CharField(source='user.first_name')
+    email = serializers.EmailField(source='user.email')
+
+    class Meta:
+        model = Tutor
+        fields = ['id', 'nome', 'email', 'cpf', 'data_nascimento', 'foto_perfil']
+
+class CuidadorSerializer(serializers.ModelSerializer):
+    nome = serializers.CharField(source='user.first_name')
+    email = serializers.EmailField(source='user.email')
+
+    class Meta:
+        model = Cuidador
+        fields = ['id', 'nome', 'email', 'descricao', 'telefone', 'foto_perfil']

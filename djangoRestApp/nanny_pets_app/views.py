@@ -13,6 +13,9 @@ from rest_framework.decorators import action
 from .permissions import IsTutorUser
 from rest_framework.exceptions import ValidationError, PermissionDenied
 from django.contrib.auth import authenticate
+from rest_framework.decorators import api_view, permission_classes
+from rest_framework.permissions import IsAuthenticated
+from .serializers import TutorSerializer, CuidadorSerializer
 
 class CustomAuthToken(ObtainAuthToken):
     def post(self, request, *args, **kwargs):
@@ -33,7 +36,29 @@ class UserRegisterView(APIView):
             serializer.save()
             return Response(serializer.data, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-        
+
+@api_view(['GET'])
+@permission_classes([IsAuthenticated])
+def usuario_logado(request):
+    user = request.user
+    try:
+        if hasattr(user, 'tutor'):
+            tutor = Tutor.objects.get(user=user)
+            serializer = TutorSerializer(tutor)
+            return Response(serializer.data)
+        elif hasattr(user, 'cuidador'):
+            cuidador = Cuidador.objects.get(user=user)
+            serializer = CuidadorSerializer(cuidador)
+            return Response(serializer.data)
+        else:
+            nome = user.get_full_name() or user.username
+            return Response({
+                'nome': nome,
+                'email': user.email
+            })
+    except Exception as e:
+        return Response({'detail': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
 class CuidadorViewSet(viewsets.ModelViewSet):
     queryset = Cuidador.objects.all()
 
