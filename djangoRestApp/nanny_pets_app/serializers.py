@@ -9,6 +9,8 @@ from urllib.parse import urljoin
 from rest_framework.validators import UniqueValidator
 
 class UserSerializer(serializers.ModelSerializer):
+    first_name = serializers.CharField(required=True)  # ⬅️ Adicionado
+
     email = serializers.EmailField(
         required=True,
         validators=[UniqueValidator(queryset=User.objects.all(), message="Este e-mail já está em uso.")]
@@ -16,14 +18,13 @@ class UserSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = User
-        fields = ['id', 'username', 'email', 'password']
+        fields = ['id', 'username', 'first_name', 'email', 'password']
         extra_kwargs = {
             'password': {'write_only': True},
         }
 
     def create(self, validated_data):
         return User.objects.create_user(**validated_data)
-
 class CuidadorFilter(django_filters.FilterSet):
     caracteristicas = django_filters.ModelMultipleChoiceFilter(
         field_name='caracteristicas',
