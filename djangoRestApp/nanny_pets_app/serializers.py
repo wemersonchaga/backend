@@ -21,9 +21,10 @@ class CuidadorFilter(django_filters.FilterSet):
 class UserSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
-        fields = ['id', 'username', 'password']
+        fields = ['id', 'username', 'password', 'email']
         extra_kwargs = {
-            'password': {'write_only': True},  # Garante que senha não seja exibida em responses
+            'password': {'write_only': True},
+            'email': {'required': True},  # força o uso do email
         }
 
     def create(self, validated_data):
