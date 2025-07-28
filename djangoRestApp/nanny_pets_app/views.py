@@ -1,21 +1,30 @@
-from django.shortcuts import get_object_or_404
-from rest_framework.views import APIView
-from rest_framework.response import Response
-from rest_framework import status, viewsets, permissions
-from rest_framework.authtoken.views import ObtainAuthToken
-from rest_framework.authtoken.models import Token
-from django_filters.rest_framework import DjangoFilterBackend
-
-from .models import Cuidador, Tutor, Pedido, Hospedagem, Pet, AvaliacaoCuidador
-from .serializers import TutorCreateSerializer, TutorReadSerializer, CuidadorCreateSerializer, CuidadorReadSerializer, CaracteristicasCuidadorSerializer, UserSerializer, PedidoSerializer, HospedagemSerializer, PetSerializer, AvaliacaoCuidadorSerializer
-from .filters import CuidadorFilter
-from rest_framework.decorators import action
-from .permissions import IsTutorUser
-from rest_framework.exceptions import ValidationError, PermissionDenied
+# Django
 from django.contrib.auth import authenticate
-from rest_framework.decorators import api_view, permission_classes
+from django.shortcuts import get_object_or_404
+
+# Bibliotecas de Terceiros (Django Rest Framework, etc.)
+from django_filters.rest_framework import DjangoFilterBackend
+from rest_framework import permissions, status, viewsets
+from rest_framework.authtoken.models import Token
+from rest_framework.authtoken.views import ObtainAuthToken
+from rest_framework.decorators import action, api_view, permission_classes
+from rest_framework.exceptions import PermissionDenied, ValidationError
 from rest_framework.permissions import IsAuthenticated
-from .serializers import TutorSerializer, CuidadorSerializer
+from rest_framework.response import Response
+from rest_framework.views import APIView
+
+# Imports Locais
+from .filters import CuidadorFilter
+from .models import (AvaliacaoCuidador, Cuidador, Hospedagem, Pedido, Pet,
+                     Tutor)
+from .permissions import IsTutorUser
+from .serializers import (AvaliacaoCuidadorSerializer,
+                          CaracteristicasCuidadorSerializer,
+                          CuidadorCreateSerializer, CuidadorReadSerializer,
+                          CuidadorSerializer, HospedagemSerializer,
+                          PedidoSerializer, PetSerializer,
+                          TutorCreateSerializer, TutorReadSerializer,
+                          TutorSerializer, UserSerializer)
 
 class CustomAuthToken(ObtainAuthToken):
     def post(self, request, *args, **kwargs):
@@ -43,13 +52,9 @@ def usuario_logado(request):
     user = request.user
     try:
         if hasattr(user, 'tutor'):
-            tutor = Tutor.objects.get(user=user)
-            serializer = TutorSerializer(tutor)
-            return Response(serializer.data)
+            return Response(TutorSerializer(user.tutor).data)
         elif hasattr(user, 'cuidador'):
-            cuidador = Cuidador.objects.get(user=user)
-            serializer = CuidadorSerializer(cuidador)
-            return Response(serializer.data)
+            return Response(CuidadorSerializer(user.cuidador).data)
         else:
             nome = user.get_full_name() or user.username
             return Response({
@@ -61,17 +66,16 @@ def usuario_logado(request):
 
 class CuidadorViewSet(viewsets.ModelViewSet):
     queryset = Cuidador.objects.all()
+    filter_backends = [DjangoFilterBackend]
+    filterset_class = CuidadorFilter
+    permission_classes = [permissions.IsAuthenticated]
 
     def get_serializer_class(self):
         if self.action in ['create', 'update', 'partial_update']:
             return CuidadorCreateSerializer
         return CuidadorReadSerializer
-    filter_backends = [DjangoFilterBackend]
-    filterset_class = CuidadorFilter
-    permission_classes = [permissions.IsAuthenticated]
 
     def get_queryset(self):
-        # Evita erro no Swagger
         if getattr(self, 'swagger_fake_view', False):
             return Cuidador.objects.none()
         return Cuidador.objects.all()
@@ -85,6 +89,14 @@ class CuidadorViewSet(viewsets.ModelViewSet):
         serializer = self.get_serializer(queryset, many=True)
         return Response(serializer.data)
 
+    @action(detail=False, methods=['get'], url_path='me', permission_classes=[IsAuthenticated])
+    def me(self, request):
+        cuidador = Cuidador.objects.filter(user=request.user).first()
+        if cuidador:
+            serializer = CuidadorReadSerializer(cuidador)
+            return Response(serializer.data)
+        return Response({}, status=200)
+
     def perform_create(self, serializer):
         user = self.request.user
         if hasattr(user, 'cuidador'):
@@ -93,7 +105,6 @@ class CuidadorViewSet(viewsets.ModelViewSet):
 
 class CaracteristicasAPIView(APIView):
     def get(self, request):
-        from .models import CaracteristicasCuidador  # adicione este import
         caracteristicas = CaracteristicasCuidador.objects.all()
         serializer = CaracteristicasCuidadorSerializer(caracteristicas, many=True)
         return Response(serializer.data)
@@ -101,27 +112,31 @@ class CaracteristicasAPIView(APIView):
 class CaracteristicasDoCuidadorView(APIView):
     def get(self, request, cuidador_id):
         cuidador = get_object_or_404(Cuidador, id=cuidador_id)
-        caracteristicas = cuidador.caracteristicas.all()  # instância, não classe
+        caracteristicas = cuidador.caracteristicas.all()
         serializer = CaracteristicasCuidadorSerializer(caracteristicas, many=True)
         return Response(serializer.data)
 
 class TutorViewSet(viewsets.ModelViewSet):
     queryset = Tutor.objects.all()
+    permission_classes = [permissions.IsAuthenticated]
 
     def get_serializer_class(self):
         if self.action in ['create', 'update', 'partial_update']:
             return TutorCreateSerializer
         return TutorReadSerializer
 
-    permission_classes = [permissions.IsAuthenticated]
-
     def get_queryset(self):
-        # Evita erro no Swagger
         if getattr(self, 'swagger_fake_view', False):
             return Tutor.objects.none()
+        return Tutor.objects.filter(user=self.request.user)
 
-        user = self.request.user
-        return Tutor.objects.filter(user=user)
+    @action(detail=False, methods=['get'], url_path='me', permission_classes=[IsAuthenticated])
+    def me(self, request):
+        tutor = Tutor.objects.filter(user=request.user).first()
+        if tutor:
+            serializer = TutorReadSerializer(tutor)
+            return Response(serializer.data)
+        return Response({}, status=200)
 
     def perform_create(self, serializer):
         user = self.request.user
@@ -134,24 +149,20 @@ class PedidoViewSet(viewsets.ModelViewSet):
     serializer_class = PedidoSerializer
     permission_classes = [permissions.IsAuthenticated]
     filter_backends = [DjangoFilterBackend]
-    filterset_fields = ['status']  # <-- Aqui habilita filtro por status
+    filterset_fields = ['status']
 
     def get_queryset(self):
         user = self.request.user
-
         if getattr(self, 'swagger_fake_view', False):
             return Pedido.objects.none()
-
         if hasattr(user, 'tutor'):
             return Pedido.objects.filter(tutor=user.tutor)
         elif hasattr(user, 'cuidador'):
             return Pedido.objects.filter(cuidador=user.cuidador)
-
         return Pedido.objects.none()
 
     def perform_create(self, serializer):
         user = self.request.user
-
         if hasattr(user, 'tutor'):
             tutor = user.tutor
             serializer.save(tutor=tutor)
@@ -180,11 +191,9 @@ class HospedagemViewSet(viewsets.ModelViewSet):
             data_inicio = serializer.validated_data['data_inicio']
             data_fim = serializer.validated_data['data_fim']
 
-            # Validação: data de início deve ser antes da data de fim
             if data_inicio >= data_fim:
                 raise ValidationError("A data de início deve ser anterior à data de fim.")
 
-            # Verifica se há conflitos com outras hospedagens
             conflitos = Hospedagem.objects.filter(
                 cuidador=cuidador,
                 data_inicio__lt=data_fim,
@@ -192,9 +201,8 @@ class HospedagemViewSet(viewsets.ModelViewSet):
             )
             if conflitos.exists():
                 raise ValidationError("O cuidador já possui hospedagens nesse período.")
-
+            
             serializer.save(tutor=tutor)
-
         except AttributeError:
             raise PermissionDenied("Usuário não é um tutor válido.")
 
@@ -220,10 +228,11 @@ class PetViewSet(viewsets.ModelViewSet):
         if pet.tutor != self.request.user.tutor:
             raise PermissionDenied("Você não tem permissão para atualizar este pet.")
         serializer.save()
-        def perform_destroy(self, instance):
-            if instance.tutor != self.request.user.tutor:
-                raise PermissionDenied("Você não tem permissão para excluir este pet.")
-            instance.delete()
+
+    def perform_destroy(self, instance):
+        if instance.tutor != self.request.user.tutor:
+            raise PermissionDenied("Você não tem permissão para excluir este pet.")
+        instance.delete()
 
 class AvaliacaoCuidadorViewSet(viewsets.ModelViewSet):
     queryset = AvaliacaoCuidador.objects.all()
@@ -237,15 +246,19 @@ class AvaliacaoCuidadorViewSet(viewsets.ModelViewSet):
         return AvaliacaoCuidador.objects.none()
 
 class LoginView(APIView):
-    authentication_classes = []  # Nenhuma autenticação necessária para acessar
-    permission_classes = []      # Permite acesso anônimo
+    authentication_classes = []
+    permission_classes = []
 
     def post(self, request):
         username = request.data.get('username')
         password = request.data.get('password')
-
         user = authenticate(username=username, password=password)
         if user:
             token, created = Token.objects.get_or_create(user=user)
-            return Response({'token': token.key})
+            return Response({
+                'token': token.key,
+                'user_id': user.pk,
+                'email': user.email
+            })
+
         return Response({'error': 'Credenciais inválidas'}, status=status.HTTP_401_UNAUTHORIZED)
