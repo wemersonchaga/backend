@@ -2,7 +2,7 @@
 from django.contrib.auth import authenticate
 from django.shortcuts import get_object_or_404
 
-# Bibliotecas de Terceiros (Django Rest Framework, etc.)
+# Terceiros
 from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework import permissions, status, viewsets
 from rest_framework.authtoken.models import Token
@@ -13,18 +13,17 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
-# Imports Locais
+# Locais
 from .filters import CuidadorFilter
-from .models import (AvaliacaoCuidador, Cuidador, Hospedagem, Pedido, Pet,
-                     Tutor)
+from .models import (AvaliacaoCuidador, Cuidador, Hospedagem, Pedido, Pet, Tutor)
 from .permissions import IsTutorUser
-from .serializers import (AvaliacaoCuidadorSerializer,
-                          CaracteristicasCuidadorSerializer,
-                          CuidadorCreateSerializer, CuidadorReadSerializer,
-                          CuidadorSerializer, HospedagemSerializer,
-                          PedidoSerializer, PetSerializer,
-                          TutorCreateSerializer, TutorReadSerializer,
-                          TutorSerializer, UserSerializer)
+from .serializers import (
+    AvaliacaoCuidadorSerializer, CaracteristicasCuidadorSerializer,
+    CuidadorCreateSerializer, CuidadorReadSerializer,
+    CuidadorSerializer, HospedagemSerializer, PedidoSerializer,
+    PetSerializer, TutorCreateSerializer, TutorReadSerializer,
+    TutorSerializer, UserSerializer
+)
 
 class CustomAuthToken(ObtainAuthToken):
     def post(self, request, *args, **kwargs):
@@ -57,10 +56,7 @@ def usuario_logado(request):
             return Response(CuidadorSerializer(user.cuidador).data)
         else:
             nome = user.get_full_name() or user.username
-            return Response({
-                'nome': nome,
-                'email': user.email
-            })
+            return Response({'nome': nome, 'email': user.email})
     except Exception as e:
         return Response({'detail': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
@@ -101,7 +97,7 @@ class CuidadorViewSet(viewsets.ModelViewSet):
         user = self.request.user
         if hasattr(user, 'cuidador'):
             raise ValidationError("Este usuário já possui um perfil de cuidador.")
-        serializer.save(user=user)
+        serializer.save(user=user)  # <-- Vínculo com o User feito aqui
 
 class CaracteristicasAPIView(APIView):
     def get(self, request):
@@ -142,7 +138,7 @@ class TutorViewSet(viewsets.ModelViewSet):
         user = self.request.user
         if hasattr(user, 'tutor'):
             raise ValidationError("Este usuário já possui um perfil de tutor.")
-        serializer.save(user=user)
+        serializer.save(user=user)  # <-- Aqui vincula o tutor ao User corretamente
 
 class PedidoViewSet(viewsets.ModelViewSet):
     queryset = Pedido.objects.all()
@@ -178,33 +174,28 @@ class HospedagemViewSet(viewsets.ModelViewSet):
         if getattr(self, 'swagger_fake_view', False):
             return Hospedagem.objects.none()
         user = self.request.user
-        if not user.is_authenticated:
-            raise PermissionDenied("Usuário não autenticado.")
         if not hasattr(user, 'tutor'):
             raise PermissionDenied("Apenas tutores podem acessar suas hospedagens.")
         return Hospedagem.objects.filter(tutor=user.tutor)
 
     def perform_create(self, serializer):
-        try:
-            tutor = self.request.user.tutor
-            cuidador = serializer.validated_data['cuidador']
-            data_inicio = serializer.validated_data['data_inicio']
-            data_fim = serializer.validated_data['data_fim']
+        tutor = self.request.user.tutor
+        cuidador = serializer.validated_data['cuidador']
+        data_inicio = serializer.validated_data['data_inicio']
+        data_fim = serializer.validated_data['data_fim']
 
-            if data_inicio >= data_fim:
-                raise ValidationError("A data de início deve ser anterior à data de fim.")
+        if data_inicio >= data_fim:
+            raise ValidationError("A data de início deve ser anterior à data de fim.")
 
-            conflitos = Hospedagem.objects.filter(
-                cuidador=cuidador,
-                data_inicio__lt=data_fim,
-                data_fim__gt=data_inicio
-            )
-            if conflitos.exists():
-                raise ValidationError("O cuidador já possui hospedagens nesse período.")
-            
-            serializer.save(tutor=tutor)
-        except AttributeError:
-            raise PermissionDenied("Usuário não é um tutor válido.")
+        conflitos = Hospedagem.objects.filter(
+            cuidador=cuidador,
+            data_inicio__lt=data_fim,
+            data_fim__gt=data_inicio
+        )
+        if conflitos.exists():
+            raise ValidationError("O cuidador já possui hospedagens nesse período.")
+
+        serializer.save(tutor=tutor)
 
 class PetViewSet(viewsets.ModelViewSet):
     queryset = Pet.objects.all()
@@ -215,14 +206,14 @@ class PetViewSet(viewsets.ModelViewSet):
         if getattr(self, 'swagger_fake_view', False):
             return Pet.objects.none()
         user = self.request.user
-        if not user.is_authenticated or not hasattr(user, 'tutor'):
+        if not hasattr(user, 'tutor'):
             return Pet.objects.none()
         return Pet.objects.filter(tutor=user.tutor)
-    
+
     def perform_create(self, serializer):
         tutor = self.request.user.tutor
         serializer.save(tutor=tutor)
-    
+
     def perform_update(self, serializer):
         pet = self.get_object()
         if pet.tutor != self.request.user.tutor:
@@ -260,5 +251,4 @@ class LoginView(APIView):
                 'user_id': user.pk,
                 'email': user.email
             })
-
         return Response({'error': 'Credenciais inválidas'}, status=status.HTTP_401_UNAUTHORIZED)
