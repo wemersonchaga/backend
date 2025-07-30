@@ -108,12 +108,13 @@ class CuidadorReadSerializer(serializers.ModelSerializer):
 
 
 class CuidadorSerializer(serializers.ModelSerializer):
-    nome = serializers.CharField(source='user.first_name')
-    email = serializers.EmailField(source='user.email')
+    caracteristicas = serializers.PrimaryKeyRelatedField(queryset=Caracteristicas.objects.all(), many=True, required=False)
+    endereco = EnderecoSerializer(required=False)
+    foto_perfil = serializers.ImageField(required=False, allow_null=True)
 
     class Meta:
         model = Cuidador
-        fields = ['id', 'nome', 'email', 'descricao', 'telefone', 'foto_perfil']
+        fields = '__all__'
 
 # ------------------- TUTOR -------------------
 class TutorCreateSerializer(serializers.ModelSerializer):
