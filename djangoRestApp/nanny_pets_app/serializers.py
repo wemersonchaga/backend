@@ -57,7 +57,7 @@ class CuidadorCreateSerializer(serializers.ModelSerializer):
         model = Cuidador
         fields = [
             'id', 'nome', 'sobrenome', 'data_nascimento', 'cpf', 'email',
-            'telefone', 'cep', 'numero', 'instagram', 'caracteristicas_ids'
+            'telefone', 'cep', 'numero', 'instagram', 'foto_perfil', 'caracteristicas_ids'
         ]
         extra_kwargs = {
             'cpf': {'write_only': True},
@@ -78,7 +78,7 @@ class CuidadorReadSerializer(serializers.ModelSerializer):
         model = Cuidador
         fields = [
             'id', 'nome', 'sobrenome', 'data_nascimento',
-            'instagram', 'caracteristicas',
+            'instagram', 'foto_perfil', 'caracteristicas',
             'media_avaliacoes', 'total_avaliacoes', 'avaliacoes_recentes'
         ]
 
