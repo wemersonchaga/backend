@@ -1,7 +1,7 @@
 from django.db.models import Avg
 from rest_framework import serializers
 from django.contrib.auth.models import User
-from .models import Cuidador, CaracteristicasCuidador, Tutor, Pedido, Hospedagem, Pet, AvaliacaoCuidador
+from .models import Cuidador, CaracteristicasCuidador, Tutor, Pedido, Hospedagem, Pet, AvaliacaoCuidador, Caracteristicas
 from datetime import date
 from django.conf import settings
 from urllib.parse import urljoin
