@@ -9,6 +9,7 @@ from rest_framework.authtoken.models import Token
 from rest_framework.authtoken.views import ObtainAuthToken
 from rest_framework.decorators import action, api_view, permission_classes
 from rest_framework.exceptions import PermissionDenied, ValidationError
+from rest_framework.parsers import MultiPartParser, FormParser
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
@@ -62,6 +63,8 @@ def usuario_logado(request):
 
 class CuidadorViewSet(viewsets.ModelViewSet):
     queryset = Cuidador.objects.all()
+    serializer_class = CuidadorSerializer
+    parser_classes = (MultiPartParser, FormParser)
     filter_backends = [DjangoFilterBackend]
     filterset_class = CuidadorFilter
     permission_classes = [permissions.IsAuthenticated]
