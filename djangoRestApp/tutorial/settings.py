@@ -59,7 +59,14 @@ REST_FRAMEWORK = {
 # 🔓 Libera o Swagger sem autenticação (isso afeta apenas a interface do Swagger, não a API em si)
 SWAGGER_SETTINGS = {
     'USE_SESSION_AUTH': False,
-    'SECURITY_DEFINITIONS': None,
+    'SECURITY_DEFINITIONS': {
+        'Token': {
+            'type': 'apiKey',
+            'in': 'header',
+            'name': 'Authorization',
+            'description': 'Digite: Token <seu_token>'
+        }
+    },
 }
 
 # Se quiser liberar só no modo DEBUG (ambiente local)
