@@ -57,7 +57,7 @@ class CuidadorCreateSerializer(serializers.ModelSerializer):
     class Meta:
         model = Cuidador
         fields = [
-            'id', 'sobrenome', 'cpf', 'data_nascimento', 'telefone',
+            'id', 'nome', 'sobrenome', 'cpf', 'data_nascimento', 'telefone',
             'cep', 'estado', 'cidade', 'rua', 'numero', 'instagram',
             'foto_perfil', 'caracteristicas_ids'
         ]
@@ -73,12 +73,14 @@ class CuidadorCreateSerializer(serializers.ModelSerializer):
             'instagram': {'required': False, 'allow_blank': True},
         }
 
-    def create(self, validated_data):
-        caracteristicas = validated_data.pop('caracteristicas', [])
-        user = self.context['request'].user
-        cuidador = Cuidador.objects.create(usuario=user, **validated_data)
+    def create(self, validated_data, user=None):
+        if user is None:
+            caracteristicas = validated_data.pop('caracteristicas', [])
+            user = self.context['request'].user
+        validated_data.pop('user', None)
         cuidador.caracteristicas.set(caracteristicas)
-        return cuidador
+        return cuidador.objects.create(user=user, **validated_data)
+       
 
 class CuidadorReadSerializer(serializers.ModelSerializer):
     caracteristicas = CaracteristicasCuidadorSerializer(many=True, read_only=True)
