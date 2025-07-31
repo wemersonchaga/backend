@@ -86,7 +86,7 @@ class CuidadorViewSet(viewsets.ModelViewSet):
     def get_queryset(self):
         if getattr(self, 'swagger_fake_view', False):
             return Cuidador.objects.none()
-        return Cuidador.objects.all()
+        return Cuidador.objects.filter(user=self.request.user)
 
     @action(detail=False, methods=['get'], url_path='filtrar')
     def filtrar_por_caracteristicas(self, request):
@@ -110,7 +110,8 @@ class CuidadorViewSet(viewsets.ModelViewSet):
         # Impede múltiplos perfis de cuidador para o mesmo usuário
         if hasattr(user, 'cuidador'):
             raise ValidationError("Este usuário já possui um perfil de cuidador.")
-        serializer.save(user=user)
+        serializer.save(user=user)  # <-- Aqui vincula o tutor ao User corretamente
+
 
 class CaracteristicasAPIView(APIView):
     def get(self, request):
