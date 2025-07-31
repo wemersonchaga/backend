@@ -246,16 +246,20 @@ class LoginView(APIView):
     permission_classes = []
 
     def post(self, request):
-        login_value = request.data.get('username')  # Pode ser username ou email
+        login_value = request.data.get('username', '').lower()
         password = request.data.get('password')
 
-        # Tenta autenticar usando username
-        user = authenticate(username=login_value, password=password)
+        # Tenta buscar username case-insensitive
+        try:
+            user_obj = User.objects.get(username__iexact=login_value)
+            user = authenticate(username=user_obj.username, password=password)
+        except User.DoesNotExist:
+            user = None
 
-        # Se falhar, tenta buscar pelo email e autenticar
+        # Se falhar, tenta email case-insensitive
         if not user:
             try:
-                user_obj = User.objects.get(email=login_value)
+                user_obj = User.objects.get(email__iexact=login_value)
                 user = authenticate(username=user_obj.username, password=password)
             except User.DoesNotExist:
                 user = None
