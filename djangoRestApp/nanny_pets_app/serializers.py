@@ -57,13 +57,13 @@ class CuidadorCreateSerializer(serializers.ModelSerializer):
     class Meta:
         model = Cuidador
         fields = [
-            'id', 'nome', 'sobrenome', 'data_nascimento', 'cpf', 'email',
-            'telefone', 'cep', 'estado', 'cidade', 'rua', 'numero',
-            'instagram', 'foto_perfil', 'caracteristicas_ids'
+            'id', 'sobrenome', 'cpf', 'data_nascimento', 'telefone',
+            'cep', 'estado', 'cidade', 'rua', 'numero', 'instagram',
+            'foto_perfil', 'caracteristicas_ids'
         ]
         extra_kwargs = {
-            'cpf': {'write_only': True},
-            'email': {'write_only': True},
+            'sobrenome': {'required': True},
+            'cpf': {'required': True, 'write_only': True},
             'telefone': {'write_only': True},
             'cep': {'write_only': True},
             'estado': {'write_only': True},
@@ -76,21 +76,9 @@ class CuidadorCreateSerializer(serializers.ModelSerializer):
     def create(self, validated_data):
         caracteristicas = validated_data.pop('caracteristicas', [])
         user = self.context['request'].user
-        cuidador = Cuidador.objects.create(user=user, **validated_data)
+        cuidador = Cuidador.objects.create(usuario=user, **validated_data)
         cuidador.caracteristicas.set(caracteristicas)
         return cuidador
-        
-    def perform_create(self, serializer):
-        user = self.request.user
-        if hasattr(user, 'tutor'):
-            raise ValidationError("Este usuário já possui um perfil de tutor.")
-            try:
-                tutor = serializer.save(user=user)
-            except Exception as e:
-                import logging
-                logger = logging.getLogger(__name__)
-                logger.error(f"Erro ao criar tutor: {e}", exc_info=True)
-                raise ValidationError(f"Erro ao criar tutor: {str(e)}")
 
 class CuidadorReadSerializer(serializers.ModelSerializer):
     caracteristicas = CaracteristicasCuidadorSerializer(many=True, read_only=True)
