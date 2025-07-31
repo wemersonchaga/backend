@@ -52,20 +52,33 @@ class CuidadorCreateSerializer(serializers.ModelSerializer):
         write_only=True,
         source='caracteristicas'
     )
+    foto_perfil = serializers.ImageField(required=False, allow_null=True)
 
     class Meta:
         model = Cuidador
         fields = [
             'id', 'nome', 'sobrenome', 'data_nascimento', 'cpf', 'email',
-            'telefone', 'cep', 'numero', 'instagram', 'foto_perfil', 'caracteristicas_ids'
+            'telefone', 'cep', 'estado', 'cidade', 'rua', 'numero',
+            'instagram', 'foto_perfil', 'caracteristicas_ids'
         ]
         extra_kwargs = {
             'cpf': {'write_only': True},
             'email': {'write_only': True},
             'telefone': {'write_only': True},
             'cep': {'write_only': True},
+            'estado': {'write_only': True},
+            'cidade': {'write_only': True},
+            'rua': {'write_only': True},
             'numero': {'write_only': True},
+            'instagram': {'required': False, 'allow_blank': True},
         }
+
+    def create(self, validated_data):
+        caracteristicas = validated_data.pop('caracteristicas', [])
+        user = self.context['request'].user
+        cuidador = Cuidador.objects.create(user=user, **validated_data)
+        cuidador.caracteristicas.set(caracteristicas)
+        return cuidador
 
 
 class CuidadorReadSerializer(serializers.ModelSerializer):
