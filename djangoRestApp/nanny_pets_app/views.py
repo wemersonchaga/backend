@@ -116,6 +116,7 @@ class CaracteristicasDoCuidadorView(APIView):
         return Response(serializer.data)
 
 class TutorViewSet(viewsets.ModelViewSet):
+    parser_classes = (MultiPartParser, FormParser)
     queryset = Tutor.objects.all()
     permission_classes = [permissions.IsAuthenticated]
 
