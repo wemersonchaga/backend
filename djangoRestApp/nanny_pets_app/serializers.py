@@ -231,7 +231,19 @@ class PetSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Pet
-        fields = ['id', 'nome', 'especie', 'porte', 'tutor']
+        fields = [
+            'id',
+            'nome',
+            'especie',
+            'raca',
+            'porte',
+            'idade',
+            'castrado',
+            'genero',
+            'foto',
+            'observacoes',
+            'tutor'
+        ]
         read_only_fields = ['id', 'tutor']
 
     def create(self, validated_data):
