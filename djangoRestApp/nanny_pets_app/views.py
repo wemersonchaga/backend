@@ -1,5 +1,6 @@
 # Django
 from django.contrib.auth import authenticate
+from django.contrib.auth.models import User
 from django.shortcuts import get_object_or_404
 
 # Terceiros
@@ -245,9 +246,20 @@ class LoginView(APIView):
     permission_classes = []
 
     def post(self, request):
-        username = request.data.get('username')
+        login_value = request.data.get('username')  # Pode ser username ou email
         password = request.data.get('password')
-        user = authenticate(username=username, password=password)
+
+        # Tenta autenticar usando username
+        user = authenticate(username=login_value, password=password)
+
+        # Se falhar, tenta buscar pelo email e autenticar
+        if not user:
+            try:
+                user_obj = User.objects.get(email=login_value)
+                user = authenticate(username=user_obj.username, password=password)
+            except User.DoesNotExist:
+                user = None
+
         if user:
             token, created = Token.objects.get_or_create(user=user)
             return Response({
@@ -255,4 +267,5 @@ class LoginView(APIView):
                 'user_id': user.pk,
                 'email': user.email
             })
+
         return Response({'error': 'Credenciais inválidas'}, status=status.HTTP_401_UNAUTHORIZED)
