@@ -147,10 +147,11 @@ class TutorCreateSerializer(serializers.ModelSerializer):
         model = Tutor
         fields = ('id', 'nome', 'sobrenome', 'data_nascimento', 'cpf', 'email', 'foto_perfil')
 
-    def create(self, validated_data):
-        user = self.context['request'].user
+    def create(self, validated_data, user=None):
+        if user is None:
+            user = self.context['request'].user
+        validated_data.pop('user', None)
         return Tutor.objects.create(user=user, **validated_data)
-
 
 class TutorReadSerializer(serializers.ModelSerializer):
     class Meta:
