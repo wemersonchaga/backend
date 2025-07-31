@@ -99,9 +99,10 @@ class CuidadorViewSet(viewsets.ModelViewSet):
 
     def perform_create(self, serializer):
         user = self.request.user
+        # Impede múltiplos perfis de cuidador para o mesmo usuário
         if hasattr(user, 'cuidador'):
             raise ValidationError("Este usuário já possui um perfil de cuidador.")
-        serializer.save(user=user)  # <-- Vínculo com o User feito aqui
+        serializer.save(user=user)
 
 class CaracteristicasAPIView(APIView):
     def get(self, request):
