@@ -17,7 +17,15 @@ from rest_framework.views import APIView
 
 # Locais
 from .filters import CuidadorFilter
-from .models import (AvaliacaoCuidador, Cuidador, Hospedagem, Pedido, Pet, Tutor)
+from .models import (
+    AvaliacaoCuidador,
+    CaracteristicasCuidador,
+    Cuidador,
+    Hospedagem,
+    Pedido,
+    Pet,
+    Tutor
+)
 from .permissions import IsTutorUser
 from .serializers import (
     AvaliacaoCuidadorSerializer, CaracteristicasCuidadorSerializer,
