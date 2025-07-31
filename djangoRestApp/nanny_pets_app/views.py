@@ -216,8 +216,7 @@ class PetViewSet(viewsets.ModelViewSet):
         return Pet.objects.filter(tutor=user.tutor)
 
     def perform_create(self, serializer):
-        tutor = self.request.user.tutor
-        serializer.save(tutor=tutor)
+        serializer.save()  # Remova o tutor=tutor daqui
 
     def perform_update(self, serializer):
         pet = self.get_object()
