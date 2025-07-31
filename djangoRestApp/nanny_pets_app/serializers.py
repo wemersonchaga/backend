@@ -81,18 +81,16 @@ class CuidadorCreateSerializer(serializers.ModelSerializer):
         return cuidador
         
     def perform_create(self, serializer):
-    user = self.request.user
-    if hasattr(user, 'tutor'):
-        raise ValidationError("Este usuário já possui um perfil de tutor.")
-    try:
-        tutor = serializer.save(user=user)
-    except Exception as e:
-        import logging
-        logger = logging.getLogger(__name__)
-        logger.error(f"Erro ao criar tutor: {e}", exc_info=True)
-        raise ValidationError(f"Erro ao criar tutor: {str(e)}")
-
-
+        user = self.request.user
+        if hasattr(user, 'tutor'):
+            raise ValidationError("Este usuário já possui um perfil de tutor.")
+            try:
+                tutor = serializer.save(user=user)
+            except Exception as e:
+                import logging
+                logger = logging.getLogger(__name__)
+                logger.error(f"Erro ao criar tutor: {e}", exc_info=True)
+                raise ValidationError(f"Erro ao criar tutor: {str(e)}")
 
 class CuidadorReadSerializer(serializers.ModelSerializer):
     caracteristicas = CaracteristicasCuidadorSerializer(many=True, read_only=True)
