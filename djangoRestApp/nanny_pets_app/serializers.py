@@ -80,10 +80,10 @@ class CuidadorCreateSerializer(serializers.ModelSerializer):
             user = self.context['request'].user
             validated_data.pop('user', None)  # remove user se estiver no validated_data
             # Cria o cuidador
-    cuidador = Cuidador.objects.create(user=user, **validated_data)
-    # Seta as características
-    cuidador.caracteristicas.set(caracteristicas)
-    return cuidador
+        cuidador = Cuidador.objects.create(user=user, **validated_data)
+        # Seta as características
+        cuidador.caracteristicas.set(caracteristicas)
+        return cuidador
 
 class CuidadorReadSerializer(serializers.ModelSerializer):
     caracteristicas = CaracteristicasCuidadorSerializer(many=True, read_only=True)
