@@ -74,13 +74,21 @@ class CuidadorCreateSerializer(serializers.ModelSerializer):
         }
 
     def create(self, validated_data, user=None):
-        if user is None:
-            caracteristicas = validated_data.pop('caracteristicas', [])
-            user = self.context['request'].user
-        validated_data.pop('user', None)
-        cuidador.caracteristicas.set(caracteristicas)
-        return cuidador.objects.create(user=user, **validated_data)
-       
+    caracteristicas = validated_data.pop('caracteristicas', [])
+    
+    # Pega o usuário do contexto se não for passado diretamente
+    if user is None:
+        user = self.context['request'].user
+
+    validated_data.pop('user', None)  # remove user se estiver no validated_data
+
+    # Cria o cuidador
+    cuidador = Cuidador.objects.create(user=user, **validated_data)
+
+    # Seta as características
+    cuidador.caracteristicas.set(caracteristicas)
+
+    return cuidador
 
 class CuidadorReadSerializer(serializers.ModelSerializer):
     caracteristicas = CaracteristicasCuidadorSerializer(many=True, read_only=True)
