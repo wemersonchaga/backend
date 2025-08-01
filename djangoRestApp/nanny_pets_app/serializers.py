@@ -57,7 +57,7 @@ class CuidadorCreateSerializer(serializers.ModelSerializer):
     class Meta:
         model = Cuidador
         fields = [
-            'id', 'nome', 'sobrenome', 'cpf', 'data_nascimento', 'telefone',
+            'id', 'nome', 'sobrenome', 'cpf', 'email', 'data_nascimento', 'telefone',
             'cep', 'estado', 'cidade', 'rua', 'numero', 'instagram',
             'foto_perfil', 'caracteristicas_ids'
         ]
