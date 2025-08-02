@@ -59,7 +59,7 @@ class CuidadorCreateSerializer(serializers.ModelSerializer):
         fields = [
             'id', 'nome', 'sobrenome', 'cpf', 'email', 'data_nascimento', 'telefone',
             'cep', 'estado', 'cidade', 'rua', 'numero', 'instagram',
-            'foto_perfil', 'caracteristicas_ids'
+            'foto_perfil', 'caracteristicas_ids', 'preco_diaria', 'porte_aceito'  # ← novos campos aqui
         ]
         extra_kwargs = {
             'sobrenome': {'required': True},
@@ -96,7 +96,7 @@ class CuidadorReadSerializer(serializers.ModelSerializer):
         fields = [
             'id', 'nome', 'sobrenome', 'data_nascimento',
             'instagram', 'foto_perfil', 'caracteristicas',
-            'media_avaliacoes', 'total_avaliacoes', 'avaliacoes_recentes'
+            'media_avaliacoes', 'total_avaliacoes', 'avaliacoes_recentes', 'preco_diaria', 'porte_aceito'  # ← novos campos aqui
         ]
 
     def get_media_avaliacoes(self, obj):
@@ -131,7 +131,7 @@ class CuidadorSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Cuidador
-        fields = ['id', 'nome', 'email', 'descricao', 'telefone', 'foto_perfil']
+        fields = ['id', 'nome', 'email', 'descricao', 'telefone', 'foto_perfil', 'preco_diaria', 'porte_aceito' ]
         fields = '__all__'
 
 # ------------------- TUTOR -------------------
