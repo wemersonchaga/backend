@@ -57,7 +57,7 @@ class CuidadorCreateSerializer(serializers.ModelSerializer):
     class Meta:
         model = Cuidador
         fields = [
-            'id', 'nome', 'sobrenome', 'cpf', 'email', 'data_nascimento', 'telefone',
+            'id', 'nome', 'sobrenome', 'cpf', 'email', 'data_nascimento', 'descricao', 'telefone',
             'cep', 'estado', 'cidade', 'rua', 'numero', 'instagram',
             'foto_perfil', 'caracteristicas_ids', 'preco_diaria', 'portes_aceitos'
         ]
@@ -126,6 +126,7 @@ class CuidadorReadSerializer(serializers.ModelSerializer):
         model = Cuidador
         fields = [
             'id', 'nome', 'sobrenome', 'data_nascimento',
+            'cidade', 'estado', 'descricao',   # <-- adicionados aqui!
             'instagram', 'foto_perfil',
             'caracteristicas',
             'imagens_ambiente',
