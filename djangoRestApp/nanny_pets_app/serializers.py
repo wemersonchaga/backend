@@ -131,7 +131,6 @@ class CuidadorSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Cuidador
-        fields = ['id', 'nome', 'email', 'descricao', 'telefone', 'foto_perfil', 'preco_diaria', 'porte_aceitos' ]
         fields = '__all__'
 
 # ------------------- TUTOR -------------------
