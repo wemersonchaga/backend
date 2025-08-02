@@ -26,6 +26,17 @@ class Tutor(Pessoa):
     def __str__(self):
         return f'{self.nome} {self.sobrenome}'
 
+# Modelo para porte de pet
+class Porte(models.Model):
+    nome = models.CharField(max_length=20, choices=[
+        ('pequeno', 'Pequeno'),
+        ('medio', 'Médio'),
+        ('grande', 'Grande'),
+    ], unique=True)
+
+    def __str__(self):
+        return self.get_nome_display()
+
 # Cuidador - quem hospeda pets
 class Cuidador(Pessoa):
     user = models.OneToOneField(User, on_delete=models.CASCADE, related_name='cuidador')
@@ -38,6 +49,7 @@ class Cuidador(Pessoa):
     instagram = models.CharField(max_length=100, blank=True, null=True)
     disponivel = models.BooleanField(default=True)  # Novo campo
     caracteristicas = models.ManyToManyField('CaracteristicasCuidador', blank=True, related_name='cuidadores')
+    portes_aceitos = models.ManyToManyField(Porte, blank=True, related_name='cuidadores')  # <-- novo campo
 
     def __str__(self):
         return f'{self.nome} {self.sobrenome}'
@@ -120,7 +132,6 @@ class CaracteristicasCuidador(models.Model):
 
     def __str__(self):
         return self.nome
-
 
 # Imagens do ambiente do cuidador
 class ImagemAmbiente(models.Model):
