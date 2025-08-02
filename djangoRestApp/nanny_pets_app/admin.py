@@ -55,7 +55,7 @@ class TutorAdmin(admin.ModelAdmin):
 
 @admin.register(Cuidador)
 class CuidadorAdmin(admin.ModelAdmin):
-    list_display = ('nome', 'sobrenome', 'email', 'cidade', 'estado', 'disponivel')
+    list_display = ('nome', 'sobrenome', 'email', 'cidade', 'estado', 'disponivel', 'preco_diaria', 'porte_aceito')
     list_filter = ('disponivel', 'estado')
     search_fields = ('nome', 'sobrenome', 'email', 'cidade')
     inlines = [PedidoInline]
