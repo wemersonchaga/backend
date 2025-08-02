@@ -47,7 +47,7 @@ class Cuidador(Pessoa):
     cidade = models.CharField(max_length=100, null=True)
     rua = models.CharField(max_length=100)
     numero = models.CharField(max_length=10, default='S/N')
-    descricao = models.TextField()
+    descricao = models.TextField(default='Descrição não informada.')
     instagram = models.CharField(max_length=100, blank=True, null=True)
     disponivel = models.BooleanField(default=True)  # Novo campo
     caracteristicas = models.ManyToManyField('CaracteristicasCuidador', blank=True, related_name='cuidadores')
