@@ -56,14 +56,14 @@ class TutorAdmin(admin.ModelAdmin):
 @admin.register(Cuidador)
 class CuidadorAdmin(admin.ModelAdmin):
     list_display = (
-        'nome', 'sobrenome', 'email', 'cidade', 'estado', 'disponivel', 'preco_diaria', 'mostrar_portes_aceitos'
+        'nome', 'sobrenome', 'email', 'cidade', 'estado', 'descricao', 'disponivel', 'preco_diaria', 'mostrar_portes_aceitos'
     )
     search_fields = ('nome', 'sobrenome', 'email', 'cidade', 'estado')
     list_filter = ('cidade', 'estado', 'disponivel')
     inlines = [PedidoInline]
     fieldsets = (
         ('Informações Pessoais', {
-            'fields': ('nome', 'sobrenome', 'data_nascimento', 'foto_perfil')
+            'fields': ('nome', 'sobrenome', 'data_nascimento', 'descricao', 'foto_perfil')
         }),
         ('Contato e Endereço', {
             'fields': ('telefone', 'cep', 'estado', 'cidade', 'rua', 'numero', 'instagram')
