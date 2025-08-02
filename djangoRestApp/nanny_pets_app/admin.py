@@ -107,8 +107,7 @@ class AvaliacaoCuidadorAdmin(admin.ModelAdmin):
 
 class ImagemAmbienteAdmin(admin.ModelAdmin):
     list_display = ('cuidador', 'foto')
-    change_list_template = 'admin/imagemambiente_changelist.html'
-
+    
     def get_urls(self):
         urls = super().get_urls()
         custom_urls = [
