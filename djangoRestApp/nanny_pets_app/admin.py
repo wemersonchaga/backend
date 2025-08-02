@@ -55,7 +55,7 @@ class TutorAdmin(admin.ModelAdmin):
 
 @admin.register(Cuidador)
 class CuidadorAdmin(admin.ModelAdmin):
-    list_display = ('nome', 'sobrenome', 'email', 'cidade', 'estado', 'disponivel', 'preco_diaria', 'porte_aceito')
+    list_display = ('nome', 'sobrenome', 'email', 'cidade', 'estado', 'disponivel', 'preco_diaria', 'mostrar_portes_aceitos')
     list_filter = ('disponivel', 'estado')
     search_fields = ('nome', 'sobrenome', 'email', 'cidade')
     inlines = [PedidoInline]
@@ -70,6 +70,10 @@ class CuidadorAdmin(admin.ModelAdmin):
             'fields': ('cpf', 'email', 'senha', 'disponivel')
         }),
     )
+
+    def mostrar_portes_aceitos(self, obj):
+        return ", ".join([p.get_nome_display() for p in obj.portes_aceitos.all()])
+    mostrar_portes_aceitos.short_description = 'Portes Aceitos'
 
 @admin.register(Pet)
 class PetAdmin(admin.ModelAdmin):
