@@ -127,6 +127,16 @@ class CaracteristicasDoCuidadorView(APIView):
         serializer = CaracteristicasCuidadorSerializer(caracteristicas, many=True)
         return Response(serializer.data)
 
+class UploadImagensAmbienteView(APIView):
+    permission_classes = [permissions.IsAuthenticated]
+
+    def post(self, request):
+        serializer = ImagemAmbienteUploadSerializer(data=request.data)
+        if serializer.is_valid():
+            imagens = serializer.save()
+            return Response({"mensagem": f"{len(imagens)} imagens enviadas com sucesso."}, status=status.HTTP_201_CREATED)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
 class TutorViewSet(viewsets.ModelViewSet):
     parser_classes = (MultiPartParser, FormParser)
     queryset = Tutor.objects.all()
