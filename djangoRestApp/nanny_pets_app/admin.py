@@ -5,7 +5,7 @@ from django.template.response import TemplateResponse
 
 from .forms import ImagemAmbienteBatchUploadForm
 from .models import (
-    Tutor, Cuidador, Pet, AvaliacaoCuidador,
+    Tutor, Cuidador, Porte, Pet, AvaliacaoCuidador,
     CaracteristicasCuidador, ImagemAmbiente, Pedido
 )
 
@@ -55,9 +55,11 @@ class TutorAdmin(admin.ModelAdmin):
 
 @admin.register(Cuidador)
 class CuidadorAdmin(admin.ModelAdmin):
-    list_display = ('nome', 'sobrenome', 'email', 'cidade', 'estado', 'disponivel', 'preco_diaria', 'mostrar_portes_aceitos')
-    list_filter = ('disponivel', 'estado')
-    search_fields = ('nome', 'sobrenome', 'email', 'cidade')
+    list_display = (
+        'nome', 'sobrenome', 'email', 'cidade', 'estado', 'disponivel', 'preco_diaria', 'mostrar_portes_aceitos'
+    )
+    search_fields = ('nome', 'sobrenome', 'email', 'cidade', 'estado')
+    list_filter = ('cidade', 'estado', 'disponivel')
     inlines = [PedidoInline]
     fieldsets = (
         ('Informações Pessoais', {
@@ -72,8 +74,13 @@ class CuidadorAdmin(admin.ModelAdmin):
     )
 
     def mostrar_portes_aceitos(self, obj):
-        return ", ".join([p.get_nome_display() for p in obj.portes_aceitos.all()])
+        return ", ".join([p.__str__() for p in obj.portes_aceitos.all()])
+
     mostrar_portes_aceitos.short_description = 'Portes Aceitos'
+    
+@admin.register(Porte)
+class PorteAdmin(admin.ModelAdmin):
+    list_display = ('nome',)
 
 @admin.register(Pet)
 class PetAdmin(admin.ModelAdmin):
