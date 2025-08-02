@@ -1,5 +1,6 @@
 from django.db import models
-from django.contrib.auth.models import User  
+from django.contrib.auth.models import User
+from django.core.validators import MinValueValidator
 
 # Modelo base abstrato
 class Pessoa(models.Model):
@@ -49,6 +50,14 @@ class Cuidador(Pessoa):
     instagram = models.CharField(max_length=100, blank=True, null=True)
     disponivel = models.BooleanField(default=True)  # Novo campo
     caracteristicas = models.ManyToManyField('CaracteristicasCuidador', blank=True, related_name='cuidadores')
+    preco_diaria = models.DecimalField(
+        max_digits=6,
+        decimal_places=2,
+        null=True,
+        blank=True,
+        validators=[MinValueValidator(0.0)],
+        verbose_name="Preço por diária"
+    )
     portes_aceitos = models.ManyToManyField(Porte, blank=True, related_name='cuidadores')  # <-- novo campo
 
     def __str__(self):
