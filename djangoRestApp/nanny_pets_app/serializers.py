@@ -189,10 +189,17 @@ class TutorCreateSerializer(serializers.ModelSerializer):
         return Tutor.objects.create(user=user, **validated_data)
 
 class TutorReadSerializer(serializers.ModelSerializer):
+    foto_perfil = serializers.SerializerMethodField()
+
     class Meta:
         model = Tutor
-        fields = ('id', 'nome', 'sobrenome', 'data_nascimento', 'foto_perfil')
+        fields = ['id', 'nome', 'sobrenome', 'data_nascimento', 'email', 'foto_perfil']
 
+    def get_foto_perfil(self, obj):
+        request = self.context.get('request')
+        if obj.foto_perfil:
+            return request.build_absolute_uri(obj.foto_perfil.url)
+        return None
 
 class TutorSimplesSerializer(serializers.ModelSerializer):
     class Meta:
@@ -204,11 +211,12 @@ class TutorSimplesSerializer(serializers.ModelSerializer):
 class TutorSerializer(serializers.ModelSerializer):
     nome = serializers.CharField(source='user.first_name')
     email = serializers.EmailField(source='user.email')
+    foto_perfil = serializers.ImageField(required=False, allow_null=True)
 
     class Meta:
         model = Tutor
-        fields = ['id', 'nome', 'email', 'cpf', 'data_nascimento', 'foto_perfil']
-
+        fields = '__all__'
+        
 # ------------------- PEDIDO -------------------
 class PedidoSerializer(serializers.ModelSerializer):
     class Meta:
