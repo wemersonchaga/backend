@@ -121,12 +121,13 @@ class CuidadorReadSerializer(serializers.ModelSerializer):
     media_avaliacoes = serializers.SerializerMethodField()
     total_avaliacoes = serializers.SerializerMethodField()
     avaliacoes_recentes = serializers.SerializerMethodField()
+    foto_perfil = serializers.SerializerMethodField()  # <---
 
     class Meta:
         model = Cuidador
         fields = [
             'id', 'nome', 'sobrenome', 'data_nascimento',
-            'cidade', 'estado', 'descricao',   # <-- adicionados aqui!
+            'cidade', 'estado', 'descricao',
             'instagram', 'foto_perfil',
             'caracteristicas',
             'imagens_ambiente',
@@ -134,6 +135,11 @@ class CuidadorReadSerializer(serializers.ModelSerializer):
             'preco_diaria', 'portes_aceitos'
         ]
 
+    def get_foto_perfil(self, obj):
+        request = self.context.get('request')
+        if obj.foto_perfil:
+            return request.build_absolute_uri(obj.foto_perfil.url)
+        return request.build_absolute_uri('/media/defaults/avatar_padrao.png')
 
     def get_media_avaliacoes(self, obj):
         media = obj.avaliacoes.aggregate(media=Avg('nota'))['media']
@@ -152,8 +158,9 @@ class CuidadorReadSerializer(serializers.ModelSerializer):
                 'tutor': {
                     'nome': f"{a.tutor.nome} {a.tutor.sobrenome}",
                     'foto_perfil': (
-                        a.tutor.foto_perfil.url if a.tutor.foto_perfil
-                        else urljoin(settings.MEDIA_URL, 'default/avatar_tutor.png')
+                        self.context['request'].build_absolute_uri(a.tutor.foto_perfil.url)
+                        if a.tutor.foto_perfil
+                        else self.context['request'].build_absolute_uri('/media/defaults/avatar_tutor.png')
                     )
                 }
             } for a in avaliacoes
