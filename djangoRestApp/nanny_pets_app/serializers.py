@@ -59,7 +59,7 @@ class CuidadorCreateSerializer(serializers.ModelSerializer):
         fields = [
             'id', 'nome', 'sobrenome', 'cpf', 'email', 'data_nascimento', 'telefone',
             'cep', 'estado', 'cidade', 'rua', 'numero', 'instagram',
-            'foto_perfil', 'caracteristicas_ids', 'preco_diaria', 'porte_aceitos'
+            'foto_perfil', 'caracteristicas_ids', 'preco_diaria', 'portes_aceitos'
         ]
         extra_kwargs = {
             'sobrenome': {'required': True},
@@ -85,8 +85,14 @@ class CuidadorCreateSerializer(serializers.ModelSerializer):
         cuidador.caracteristicas.set(caracteristicas)
         return cuidador
 
+class PorteSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Porte
+        fields = ['nome']
+
 class CuidadorReadSerializer(serializers.ModelSerializer):
     caracteristicas = CaracteristicasCuidadorSerializer(many=True, read_only=True)
+    portes_aceitos = PorteSerializer(many=True, read_only=True)
     media_avaliacoes = serializers.SerializerMethodField()
     total_avaliacoes = serializers.SerializerMethodField()
     avaliacoes_recentes = serializers.SerializerMethodField()
@@ -96,7 +102,7 @@ class CuidadorReadSerializer(serializers.ModelSerializer):
         fields = [
             'id', 'nome', 'sobrenome', 'data_nascimento',
             'instagram', 'foto_perfil', 'caracteristicas',
-            'media_avaliacoes', 'total_avaliacoes', 'avaliacoes_recentes', 'preco_diaria', 'porte_aceitos'
+            'media_avaliacoes', 'total_avaliacoes', 'avaliacoes_recentes', 'preco_diaria', 'portes_aceitos'
         ]
 
     def get_media_avaliacoes(self, obj):
