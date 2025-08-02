@@ -86,7 +86,8 @@ class CuidadorViewSet(viewsets.ModelViewSet):
     def get_queryset(self):
         if getattr(self, 'swagger_fake_view', False):
             return Cuidador.objects.none()
-        return Cuidador.objects.filter(user=self.request.user)
+        return Cuidador.objects.all()
+
 
     @action(detail=False, methods=['get'], url_path='filtrar')
     def filtrar_por_caracteristicas(self, request):
