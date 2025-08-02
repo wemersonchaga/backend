@@ -1,7 +1,7 @@
 from django.db.models import Avg
 from rest_framework import serializers
 from django.contrib.auth.models import User
-from .models import Cuidador, Porte, CaracteristicasCuidador, Tutor, Pedido, Hospedagem, Pet, AvaliacaoCuidador
+from .models import Cuidador, Porte, ImagemAmbiente, CaracteristicasCuidador, Tutor, Pedido, Hospedagem, Pet, AvaliacaoCuidador
 from datetime import date
 from django.conf import settings
 from urllib.parse import urljoin
@@ -90,9 +90,34 @@ class PorteSerializer(serializers.ModelSerializer):
         model = Porte
         fields = ['nome']
 
+class ImagemAmbienteSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = ImagemAmbiente
+        fields = ['id', 'foto']
+
+class ImagemAmbienteUploadSerializer(serializers.Serializer):
+    fotos = serializers.ListField(
+        child=serializers.ImageField(), write_only=True
+    )
+    cuidador_id = serializers.IntegerField(write_only=True)
+
+    def create(self, validated_data):
+        cuidador_id = validated_data['cuidador_id']
+        fotos = validated_data['fotos']
+        cuidador = Cuidador.objects.get(id=cuidador_id)
+
+        imagens = []
+        for foto in fotos:
+            imagem = ImagemAmbiente.objects.create(cuidador=cuidador, foto=foto)
+            imagens.append(imagem)
+
+        return imagens
+
+
 class CuidadorReadSerializer(serializers.ModelSerializer):
     caracteristicas = CaracteristicasCuidadorSerializer(many=True, read_only=True)
     portes_aceitos = PorteSerializer(many=True, read_only=True)
+    imagens_ambiente = ImagemAmbienteSerializer(source='imagens', many=True, read_only=True)
     media_avaliacoes = serializers.SerializerMethodField()
     total_avaliacoes = serializers.SerializerMethodField()
     avaliacoes_recentes = serializers.SerializerMethodField()
@@ -101,9 +126,13 @@ class CuidadorReadSerializer(serializers.ModelSerializer):
         model = Cuidador
         fields = [
             'id', 'nome', 'sobrenome', 'data_nascimento',
-            'instagram', 'foto_perfil', 'caracteristicas',
-            'media_avaliacoes', 'total_avaliacoes', 'avaliacoes_recentes', 'preco_diaria', 'portes_aceitos'
+            'instagram', 'foto_perfil',
+            'caracteristicas',
+            'imagens_ambiente',
+            'media_avaliacoes', 'total_avaliacoes', 'avaliacoes_recentes',
+            'preco_diaria', 'portes_aceitos'
         ]
+
 
     def get_media_avaliacoes(self, obj):
         media = obj.avaliacoes.aggregate(media=Avg('nota'))['media']
