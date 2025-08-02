@@ -29,14 +29,14 @@ class Tutor(Pessoa):
 
 # Modelo para porte de pet
 class Porte(models.Model):
-    nome = models.CharField(max_length=20, choices=[
+    nome = models.CharField(max_length=20, choices=(
         ('pequeno', 'Pequeno'),
         ('medio', 'Médio'),
         ('grande', 'Grande'),
-    ], unique=True)
+    ))
 
     def __str__(self):
-        return self.get_nome_display()
+        return self.get_nome_display()  # retorna 'Pequeno', 'Médio', etc.
 
 # Cuidador - quem hospeda pets
 class Cuidador(Pessoa):
@@ -58,7 +58,7 @@ class Cuidador(Pessoa):
         validators=[MinValueValidator(0.0)],
         verbose_name="Preço por diária"
     )
-    portes_aceitos = models.ManyToManyField(Porte, blank=True, related_name='cuidadores')  # <-- novo campo
+    portes_aceitos = models.ManyToManyField(Porte, blank=True, related_name='cuidadores')
 
     def __str__(self):
         return f'{self.nome} {self.sobrenome}'
