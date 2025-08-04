@@ -88,7 +88,7 @@ class CuidadorCreateSerializer(serializers.ModelSerializer):
 class PorteSerializer(serializers.ModelSerializer):
     class Meta:
         model = Porte
-        fields = ['nome']
+        fields = ['id', 'nome']
 
 class ImagemAmbienteSerializer(serializers.ModelSerializer):
     class Meta:
