@@ -5,7 +5,7 @@ from django.shortcuts import get_object_or_404
 
 # Terceiros
 from django_filters.rest_framework import DjangoFilterBackend
-from rest_framework import permissions, status, viewsets
+from rest_framework import permissions, status, viewsets, generics
 from rest_framework.authtoken.models import Token
 from rest_framework.authtoken.views import ObtainAuthToken
 from rest_framework.decorators import action, api_view, permission_classes
@@ -24,6 +24,7 @@ from .models import (
     Hospedagem,
     Pedido,
     Pet,
+    Porte,
     Tutor
 )
 from .permissions import IsTutorUser
@@ -31,9 +32,10 @@ from .serializers import (
     AvaliacaoCuidadorSerializer, CaracteristicasCuidadorSerializer,
     CuidadorCreateSerializer, CuidadorReadSerializer,
     CuidadorSerializer, HospedagemSerializer, PedidoSerializer,
-    PetSerializer, TutorCreateSerializer, TutorReadSerializer,
+    PetSerializer, PorteSerializer, TutorCreateSerializer, TutorReadSerializer,
     TutorSerializer, UserSerializer
 )
+
 
 class CustomAuthToken(ObtainAuthToken):
     def post(self, request, *args, **kwargs):
@@ -113,6 +115,9 @@ class CuidadorViewSet(viewsets.ModelViewSet):
             raise ValidationError("Este usuário já possui um perfil de cuidador.")
         serializer.save(user=user)  # <-- Aqui vincula o tutor ao User corretamente
 
+class PorteListView(generics.ListAPIView):
+    queryset = Porte.objects.all()
+    serializer_class = PorteSerializer
 
 class CaracteristicasAPIView(APIView):
     def get(self, request):
