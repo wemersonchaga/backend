@@ -1,103 +1,82 @@
-"""
-Django settings for tutorial project.
-"""
-
 import os
 from pathlib import Path
 from dotenv import load_dotenv
-from rest_framework.permissions import AllowAny
 
-# Define o diretório base do projeto
+# Base do projeto
 BASE_DIR = Path(__file__).resolve().parent.parent
 
-# Carrega variáveis de ambiente do arquivo .env no BASE_DIR
+# Carrega o .env
 dotenv_path = BASE_DIR / '.env'
 load_dotenv(dotenv_path)
 
-SECRET_KEY = 'django-insecure-u(&j6yyf8llzbv))6!17t$+bb9h8jnyz0s7s%n))k!4juk&5hs'
+# Segurança
+SECRET_KEY = os.getenv('SECRET_KEY', 'django-insecure-dev-key')
+DEBUG = os.getenv('DEBUG', 'True') == 'True'
 
-DEBUG = True
-
-ALLOWED_HOSTS = ['localhost', '127.0.0.1', '20.119.97.89']
+# Hosts permitidos
+ALLOWED_HOSTS = ['localhost', '127.0.0.1']
 if 'CODESPACE_NAME' in os.environ:
     ALLOWED_HOSTS.append(f'{os.environ["CODESPACE_NAME"]}-8000.app.github.dev')
-ALLOWED_HOSTS.append('*')  # Libera geral (ajuste para produção)
-CSRF_TRUSTED_ORIGINS = ['https://*.onrender.com']
+ALLOWED_HOSTS += [
+    '20.119.97.89',
+    'nannyspets-be-drc8ggc3d4c7hxfr.brazilsouth-01.azurewebsites.net',
+    'nannys-backend.onrender.com',
+    '*',  # Cuidado: só em desenvolvimento!
+]
 
+# CSRF trusted (ex: Render, Azure, Codespaces)
+CSRF_TRUSTED_ORIGINS = [
+    'https://localhost:8000',
+    'https://127.0.0.1:8000',
+    'https://nannys-backend.onrender.com',
+    'https://nannyspets-be-drc8ggc3d4c7hxfr.brazilsouth-01.azurewebsites.net',
+    'https://*.github.dev',
+    'https://*.azurewebsites.net',
+    'https://*.onrender.com',
+]
+
+# Data
 DATE_FORMAT = 'd/m/Y'
 
-# Aplicações instaladas
+# Aplicações
 INSTALLED_APPS = [
-    'rest_framework',
-    'nanny_pets_app',
-    'django_filters',
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+
+    'rest_framework',
+    'rest_framework.authtoken',
+    'django_filters',
     'corsheaders',
     'drf_yasg',
-    'rest_framework.authtoken',
+    'nanny_pets_app',
 ]
-
-# DRF config
-# ...
-
-# DRF config
-REST_FRAMEWORK = {
-    'DEFAULT_AUTHENTICATION_CLASSES': [
-        'rest_framework.authentication.TokenAuthentication',
-    ],
-    'DEFAULT_PERMISSION_CLASSES': [
-        'rest_framework.permissions.IsAuthenticated',  # 🔒 Protege a API por padrão
-    ],
-    'DEFAULT_SCHEMA_CLASS': 'rest_framework.schemas.openapi.AutoSchema',
-}
-
-# 🔓 Libera o Swagger sem autenticação (isso afeta apenas a interface do Swagger, não a API em si)
-SWAGGER_SETTINGS = {
-    'USE_SESSION_AUTH': False,
-    'SECURITY_DEFINITIONS': {
-        'Token': {
-            'type': 'apiKey',
-            'in': 'header',
-            'name': 'Authorization',
-            'description': 'Digite: Token <seu_token>'
-        }
-    },
-}
-
-# Se quiser liberar só no modo DEBUG (ambiente local)
-if DEBUG:
-    REST_FRAMEWORK['DEFAULT_PERMISSION_CLASSES'] = [
-        'rest_framework.permissions.AllowAny'
-    ]
-
 
 # Middleware
 MIDDLEWARE = [
-    'whitenoise.middleware.WhiteNoiseMiddleware',  # ⬅️ aqui no topo
+    'whitenoise.middleware.WhiteNoiseMiddleware',
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
+    'corsheaders.middleware.CorsMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
-    'corsheaders.middleware.CorsMiddleware',
-    'django.middleware.locale.LocaleMiddleware',
 ]
 
 # CORS
+CORS_ALLOW_ALL_ORIGINS = True  # Para dev. Em produção, defina `CORS_ALLOWED_ORIGINS`
 CORS_ALLOWED_ORIGINS = [
-    "http://localhost:4200",
-    "http://20.119.97.89:8000",
-    "https://nannyspets-be-drc8ggc3d4c7hxfr.brazilsouth-01.azurewebsites.net",
+    'http://localhost:4200',
+    'http://20.119.97.89:8000',
+    'https://nannyspets-be-drc8ggc3d4c7hxfr.brazilsouth-01.azurewebsites.net',
 ]
-CORS_ALLOW_ALL_ORIGINS = True
 
+# URLs
 ROOT_URLCONF = 'tutorial.urls'
 
 # Templates
@@ -119,7 +98,7 @@ TEMPLATES = [
 
 WSGI_APPLICATION = 'tutorial.wsgi.application'
 
-# DATABASES (dinâmico entre SQLite local e PostgreSQL prod)
+# Banco de dados
 USE_POSTGRES = os.getenv('USE_POSTGRES', 'False') == 'True'
 
 if USE_POSTGRES:
@@ -143,32 +122,53 @@ else:
 
 # Validação de senha
 AUTH_PASSWORD_VALIDATORS = [
-    {
-        'NAME': 'django.contrib.auth.password_validation.UserAttributeSimilarityValidator',
-    },
-    {
-        'NAME': 'django.contrib.auth.password_validation.MinimumLengthValidator',
-    },
-    {
-        'NAME': 'django.contrib.auth.password_validation.CommonPasswordValidator',
-    },
-    {
-        'NAME': 'django.contrib.auth.password_validation.NumericPasswordValidator',
-    },
+    {'NAME': 'django.contrib.auth.password_validation.UserAttributeSimilarityValidator'},
+    {'NAME': 'django.contrib.auth.password_validation.MinimumLengthValidator'},
+    {'NAME': 'django.contrib.auth.password_validation.CommonPasswordValidator'},
+    {'NAME': 'django.contrib.auth.password_validation.NumericPasswordValidator'},
 ]
 
 # Internacionalização
 LANGUAGE_CODE = 'pt-br'
 TIME_ZONE = 'America/Sao_Paulo'
 USE_I18N = True
+USE_L10N = True
 USE_TZ = True
 
-# Arquivos estáticos e de mídia
-STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
+# Arquivos estáticos e mídia
 STATIC_URL = '/static/'
 STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
+STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
+
 MEDIA_URL = '/media/'
 MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 
-# Campo padrão para primary key
+# DRF
+REST_FRAMEWORK = {
+    'DEFAULT_AUTHENTICATION_CLASSES': [
+        'rest_framework.authentication.TokenAuthentication',
+    ],
+    'DEFAULT_PERMISSION_CLASSES': [
+        'rest_framework.permissions.IsAuthenticated',
+    ],
+    'DEFAULT_SCHEMA_CLASS': 'rest_framework.schemas.openapi.AutoSchema',
+}
+
+# Libera Swagger sem login no modo DEBUG
+if DEBUG:
+    REST_FRAMEWORK['DEFAULT_PERMISSION_CLASSES'] = ['rest_framework.permissions.AllowAny']
+
+SWAGGER_SETTINGS = {
+    'USE_SESSION_AUTH': False,
+    'SECURITY_DEFINITIONS': {
+        'Token': {
+            'type': 'apiKey',
+            'in': 'header',
+            'name': 'Authorization',
+            'description': 'Digite: Token <seu_token>',
+        }
+    },
+}
+
+# Auto field
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
