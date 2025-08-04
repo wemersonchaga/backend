@@ -75,15 +75,20 @@ class CuidadorCreateSerializer(serializers.ModelSerializer):
 
     def create(self, validated_data, user=None):
         caracteristicas = validated_data.pop('caracteristicas', [])
-        # Pega o usuário do contexto se não for passado diretamente
+        portes_aceitos = validated_data.pop('portes_aceitos', [])
+        
         if user is None:
             user = self.context['request'].user
-            validated_data.pop('user', None)  # remove user se estiver no validated_data
-            # Cria o cuidador
+            validated_data.pop('user', None)
+
         cuidador = Cuidador.objects.create(user=user, **validated_data)
-        # Seta as características
+        
         cuidador.caracteristicas.set(caracteristicas)
+        cuidador.portes_aceitos.set(portes_aceitos)
+        
         return cuidador
+
+        
 
 class PorteSerializer(serializers.ModelSerializer):
     class Meta:

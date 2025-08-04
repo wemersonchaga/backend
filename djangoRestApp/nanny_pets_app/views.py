@@ -32,10 +32,10 @@ from .serializers import (
     AvaliacaoCuidadorSerializer, CaracteristicasCuidadorSerializer,
     CuidadorCreateSerializer, CuidadorReadSerializer,
     CuidadorSerializer, HospedagemSerializer, PedidoSerializer,
+    ImagemAmbienteUploadSerializer,
     PetSerializer, PorteSerializer, TutorCreateSerializer, TutorReadSerializer,
     TutorSerializer, UserSerializer
 )
-
 
 class CustomAuthToken(ObtainAuthToken):
     def post(self, request, *args, **kwargs):
