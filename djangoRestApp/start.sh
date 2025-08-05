@@ -1,11 +1,11 @@
 #!/bin/bash
 
-# Recebe host e port do banco via variáveis de ambiente ou padrão
+# Define host e porta do banco de dados
 DB_HOST=${DB_HOST:-localhost}
 DB_PORT=${DB_PORT:-5432}
 
 echo "Esperando o banco de dados em $DB_HOST:$DB_PORT..."
-./wait-for-db.sh "$DB_HOST" "$DB_PORT"
+python wait_for_db.py
 
 echo "Rodando migrações..."
 python manage.py migrate
