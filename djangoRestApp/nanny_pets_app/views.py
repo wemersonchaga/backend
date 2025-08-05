@@ -104,7 +104,7 @@ class CuidadorViewSet(viewsets.ModelViewSet):
     def me(self, request):
         cuidador = Cuidador.objects.filter(user=request.user).first()
         if cuidador:
-            serializer = CuidadorReadSerializer(cuidador, context={'request': request})
+            serializer = CuidadorSerializer(cuidador, context={'request': request})
             return Response(serializer.data)
         return Response(status=404)
 
@@ -161,7 +161,7 @@ class TutorViewSet(viewsets.ModelViewSet):
     def me(self, request):
         tutor = Tutor.objects.filter(user=request.user).first()
         if tutor:
-            serializer = TutorReadSerializer(tutor, context={'request': request})
+            serializer = TutorSerializer(tutor, context={'request': request})
             return Response(serializer.data)
         return Response(status=404)
 
