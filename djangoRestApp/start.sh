@@ -7,6 +7,9 @@ DB_PORT=${DB_PORT:-5432}
 echo "Esperando o banco de dados em $DB_HOST:$DB_PORT..."
 python wait_for_db.py
 
+echo "Fazendo as migrações..."
+python manage.py makemigrations
+
 echo "Rodando migrações..."
 python manage.py migrate
 
